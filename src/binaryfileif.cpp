@@ -21,7 +21,8 @@ bool BinaryFileIf::GetBit(){
 uint8_t BinaryFileIf::get(){
     next_bit_remaining=0;
     next_bit=0;
-    return instream.get();
+    if(instream.peek() != EOF) return instream.get();
+    else throw("EOF Error");
 }
 
 

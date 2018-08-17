@@ -405,6 +405,7 @@ CodedFile ReadData(std::string & filename){
         
         throw ("No data");
     }
+    
     int datalength=ReadIndex(infile);
         
     if((answer.mode & 0x80)){//Uses a single Huffman table or two
@@ -412,27 +413,30 @@ CodedFile ReadData(std::string & filename){
     }else{
         //Should improve this
         answer.data.resize(datalength);
-        for(index i=0;i<datalength;datalength++){
+        for(index i=0;i<datalength;++i){
             answer.data[i]=infile.get();
         }
     }
     if(answer.isRLE()){
-        if(answer.mode & 0x60){
+        if(answer.mode & 0x40){
             if(tree!=NULL) DestroyTree(tree);
             if(infile.get()!=0xFE) throw ("No second huffman table");
             tree =TreeFromFile(infile);
         }
-        if(infile.get()!=0xFD) throw ("No runs");
+        
+        if(infile.get()!=0xFD){
+            throw ("No runs");
+        }
         int runlength=ReadIndex(infile);
         
         
-        if((answer.mode & 0x80 or answer.mode & 0x60)){//Uses huffman
+        if((answer.mode & 0x80 or answer.mode & 0x40)){//Uses huffman
             answer.coefs=FileToData(infile,tree,runlength);
             DestroyTree(tree);
         }else{
             //Should improve this
             answer.coefs.resize(runlength);
-            for(index i=0;i<runlength;++runlength){
+            for(index i=0;i<runlength;++i){
                 answer.coefs[i]=infile.get();
             }
         }
@@ -456,7 +460,7 @@ void WriteData(CodedFile encoded_file, std::string & filename){
     
     if((encoded_file.mode & 0x80)){//Uses a single Huffman table or two
         
-        if(encoded_file.mode & 0x60){//two huff
+        if(encoded_file.mode & 0x40){//two huff
             tree=CreateHuffTree(encoded_file.data);
         }else{
             std::vector<huff_data> quantify=encoded_file.data;
@@ -481,17 +485,18 @@ void WriteData(CodedFile encoded_file, std::string & filename){
     }
     
     if(encoded_file.isRLE()){
-        if(encoded_file.mode & 0x60){ //If This has a second codification
+        if(encoded_file.mode & 0x40){ //If This has a second codification
             tree=CreateHuffTree(encoded_file.coefs);
             thing.first.clear();
             std::vector<bool> temp;
             thing=HuffTreeToMap(tree);
             outfile.put(0xFE);
+            VectorToFile(MapToVector(thing),outfile);
         }
         outfile.put(0xFD);
         WriteIndex(encoded_file.coefs.size(),outfile);
         
-        if((encoded_file.mode & 0x80) or (encoded_file.mode & 0x60)){//Uses huffman
+        if((encoded_file.mode & 0x80) or (encoded_file.mode & 0x40)){//Uses huffman
             DataToFile(encoded_file.coefs,thing.first,outfile);
         }else{
             for(auto & el : encoded_file.coefs){

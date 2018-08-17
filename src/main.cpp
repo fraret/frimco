@@ -198,6 +198,49 @@ void PictureToFile(std::string filename, picture image){
     outfile.close();
 }
 
+void RLE_Encode(const std::vector<uint8_t> & bitmap,std::vector<huff_data> & data,std::vector<huff_data> & coefs){
+    index max_pos=bitmap.size();
+    index i=0;
+    while(i<max_pos){
+        huff_data count =0;
+        huff_data value=bitmap[i];
+        if(i==max_pos-1){
+            goto past_while;
+        }
+        ++i;
+        while(count <255 and i<max_pos and bitmap[i]==value){
+            ++count;
+            ++i;
+        }
+        
+        past_while:
+        
+        coefs.push_back(count);
+        data.push_back(value);
+    }
+}
+
+std::vector<uint8_t> RLE_Decode(const std::vector<huff_data> & data,const std::vector<huff_data> & coefs,index imagesize){
+    std::vector<uint8_t> answer;
+    index i=0;
+    if(coefs.size()!=data.size()){
+        throw("Bad RLE Encoded");
+    }
+    int m=0;
+    answer.resize(imagesize);
+    while(i<data.size()){
+        index j=coefs[i]+1;
+        for(index k=0;k<j;++k){
+            answer[m]=data[i];
+            ++m;
+        }
+        ++i;
+        
+    }
+    return answer;
+}
+
+
 CodedFile Encode(picture image,uint8_t mode,uint8_t order){
     CodedFile answer;
     answer.mode=mode;
@@ -212,7 +255,7 @@ CodedFile Encode(picture image,uint8_t mode,uint8_t order){
         image=reordered_image;
     }
     if(answer.isRLE()){
-        //RLE_Encode(image.bitmap,answer.data,answer.coefs);
+        RLE_Encode(image.bitmap,answer.data,answer.coefs);
     }else{
         answer.data=image.bitmap;
     }
@@ -225,7 +268,7 @@ picture Decode(CodedFile coded_file){
     answer.y_size=coded_file.y_size;
     std::vector<huff_data> temp;
     if(coded_file.isRLE()){
-        //
+        temp=RLE_Decode(coded_file.data,coded_file.coefs,answer.size());
     }else{
         temp=coded_file.data;
     }
