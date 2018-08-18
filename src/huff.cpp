@@ -167,10 +167,12 @@ std::pair<std::map<huff_data,std::vector<bool>>,std::vector<std::pair<huff_data,
 
 
 std::vector<huff_data> MapToVector(const std::map<huff_data,std::vector<bool>> & map_f, const std::vector<std::pair<huff_data,huff_data>> & pairs){
-    /* The reverse map is ordered, I think. I believe the canonical huffman table should make it be correct, but I should double_check that
+    /* 
      * 
      * 
      */
+    
+    if(pairs.size()==1) throw ("Unary Huffman tree not supported yet");
     
     std::vector<huff_data> freq;
     huff_data max_seen_length=0;
@@ -196,12 +198,12 @@ std::vector<huff_data> MapToVector(const std::map<huff_data,std::vector<bool>> &
 }
 
 std::vector<huff_data> MapToVector(std::pair<std::map<huff_data,std::vector<bool>>,std::vector<std::pair<huff_data,huff_data>>> & thing){
-    /* The reverse map is ordered, I think. I believe the canonical huffman table should make it be correct, but I should double_check that
+    /* 
      * 
      * 
      */
     
-    std::cout<<"p";
+    //std::cout<<"p";
     return MapToVector(thing.first,thing.second);
     
 }
@@ -311,43 +313,6 @@ std::vector<huff_data> FileToData(BinaryFileIf & infile, node* tree,index num){
     return answer;
 }
 
-
-/*
-int main(){
-    std::vector<std::pair<huff_data,index>> data={{1,5},{2,9},{3,12},{4,13},{5,16},{6,45}};
-    node* tree=CreateHuffTree(data);
-    std::map<huff_data,std::vector<bool>> mapa;
-    std::vector<bool> codi;
-    HuffTreeToMap(tree,codi,mapa);
-    for(std::pair<const huff_data,std::vector<bool>> & p:mapa){
-        std::cout<<(int)p.first<<" -> ";
-        for(bool const & el:p.second){
-            if(el) std::cout<<1;
-            else std::cout<<0;
-        }
-        std::cout << std::endl;
-        
-    }
-    
-    std::map<huff_data,huff_data> rev_map=RevMapCreator(mapa);
-    //const std::vector<huff_data> vectora=MapToVector(mapa,);
-    for(const std::pair<const huff_data,const huff_data> & p:rev_map){
-        std::cout<<(int)p.first<<" ->> "<<(int)p.second;
-        std::cout << std::endl;
-        
-    }
-    const std::vector<huff_data> vectora=MapToVector(mapa,rev_map);
-    std::cout << std::endl;
-    for(auto & y:vectora){
-        std::cout << (int)y << ' ';
-    }
-    
-    
-    std::ofstream outfile("1.huff",std::ios_base::binary);
-    VectorToFile(vectora,outfile);
-    outfile.close();
-    
-}*/
 
 index ReadIndex(BinaryFileIf & infile){
     static_assert(sizeof(index)==4,"Maximum symbols is fixed to uint32 at the moment");
@@ -510,57 +475,3 @@ void WriteData(CodedFile encoded_file, std::string & filename){
     
     
 }
-
-
-
-/*
-int main(){
-    BinaryFileIf infile("1.huff");
-    node* tree =TreeFromFile(infile);
-    //std::map<huff_data,std::vector<bool>> mapa;
-    //std::vector<bool> codi;
-    HuffTreeToMap(tree,codi,mapa);
-    for(std::pair<const huff_data,std::vector<bool>> & p:mapa){
-        std::cout<<p.first<<" -> ";
-        for(bool const & el:p.second){
-            if(el) std::cout<<1;
-            else std::cout<<0;
-        }
-        std::cout << std::endl;
-        
-    }
-    BinaryFileIf datin("1.data");
-    
-    
-    
-    std::vector<huff_data> data=FileToData(datin,tree,30);
-    for(auto & el:data){
-        std::cout << el << ' ';
-    }
-    
-}
-*/
-
-/*
-int main(){
-    std::vector<huff_data> data = {'a','b','a','a','c','f','c','b','b','a',   'd','d','b','a','b','c','b','b','b','c',  'a','a','b','b','a','a','a','b','a','a'};
-    std::vector<std::pair<huff_data,index>> data_and_freqs=DataToDataAndFreqs(data);
-    
-    std::map<huff_data,std::vector<bool>> mapa;
-    std::vector<bool> ccode;
-    
-    HuffTreeToMap(CreateHuffTree(data_and_freqs),ccode,mapa);
-    
-    BinaryFileOf huff("1.huff");
-    VectorToFile(MapToVector(mapa),huff);
-    huff.close();
-    
-    BinaryFileOf datafile("1.data");
-    DataToFile(data,mapa,datafile);
-    datafile.close();
-    
-    
-    
-    
-}
-*/

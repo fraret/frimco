@@ -25,12 +25,4 @@ CodedFile ReadData(std::string & filename);
 void WriteData(CodedFile encoded_file, std::string & filename);
 
 
-
-
-
-
-
-
-
-
 #endif

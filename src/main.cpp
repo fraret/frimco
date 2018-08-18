@@ -10,7 +10,17 @@ typedef int index;
 namespace modes{
     const int row_major=0;
     const int column_major=1;
+    const int row_major_scan_1=8;
+    const int row_major_scan_2=9;
+    const int row_major_scan_3=10; //not yet implemented
+    const int row_major_scan_4=11; //        ""
+    const int column_major_scan_1=12;
+    const int column_major_scan_2=13;
+    const int column_major_scan_3=14; //not yet implemented
+    const int column_major_scan_4=15; //        ""
+    const int diag_uR_1=16;
     const int zig_zag_1=40;
+    const int zig_zag_2=41;
 }
 
 class ImageOrderIterator{
@@ -19,7 +29,7 @@ class ImageOrderIterator{
         index x,y,x_size,y_size,i;
         uint8_t mode;
         bool valid=true;
-        
+        bool toggle;
         bool IsTop(){ return y==0; }
         bool IsBottom(){ return y==(y_size-1);}
         bool IsLeft(){return x==0;}
@@ -38,7 +48,7 @@ class ImageOrderIterator{
         }
         
         
-        bool zig_zag_1_dir; //false indicates 
+        bool & zig_zag_1_dir=toggle; //false indicates 
         const bool DL=false;
         const bool UR=true;
         
@@ -76,7 +86,85 @@ class ImageOrderIterator{
             
         }
         
-    
+        const bool L=false;
+        const bool R=true;
+        const bool D=false;
+        const bool U=true;
+        bool & scan_dir=toggle;
+        
+        void nextRowMajorScan1(){
+            if(scan_dir==R){
+                if(IsRight()){
+                    ++y;
+                    scan_dir=L;
+                }else{
+                    ++x;
+                }
+            }else{
+                if(IsLeft()){
+                    ++y;
+                    scan_dir=R;
+                }else{
+                    --x;
+                }
+                
+            }
+            
+        }
+        
+        void nextColMajorScan1(){
+            if(scan_dir==U){
+                if(IsTop()){
+                    ++x;
+                    scan_dir=D;
+                }else{
+                    --y;
+                }
+            }else{
+                if(IsBottom()){
+                    ++x;
+                    scan_dir=U;
+                }else{
+                    ++y;
+                }
+                
+            }
+            
+        }
+        
+        bool & diag_on_x=toggle;
+        index past_init_pos;
+        void nextDiagUR1(){
+            if(not diag_on_x){
+                if(IsTop() or IsRight()){
+                    x=0;
+                    ++past_init_pos;
+                    y=past_init_pos;
+                    
+                    if(y==y_size){
+                        --y;
+                        ++x;
+                        diag_on_x=true;
+                        past_init_pos=1;
+                    }
+                }else{
+                    ++x;
+                    --y;
+                }
+            }else{
+                if(IsTop() or IsRight()){
+                    y=y_size-1;
+                    ++past_init_pos;
+                    x=past_init_pos;
+                
+                }else{
+                    ++x;
+                    --y;
+                }
+                
+            }
+        }
+        
     public:
         ImageOrderIterator(index y_size_s, index x_size_s, uint8_t mode_s){
             x_size=x_size_s;
@@ -96,7 +184,30 @@ class ImageOrderIterator{
                 case modes::zig_zag_1:
                     x=0;y=0;zig_zag_1_dir=DL;
                     break;
+                case modes::zig_zag_2:
+                    x=0;y=0;zig_zag_1_dir=UR;
+                    break;
                 
+                case modes::row_major_scan_1:
+                    x=0;y=0;scan_dir=R;
+                    break;
+                    
+                case modes::row_major_scan_2:
+                    x=x_size-1;y=0;scan_dir=L;
+                    break;
+                
+                case modes::column_major_scan_1:
+                    x=0;y=0;scan_dir=D;
+                    break;
+                
+                case modes::column_major_scan_2:
+                    x=0;y=y_size-1;scan_dir=U;
+                    break;
+                
+                case modes::diag_uR_1:
+                    x=0;y=0;past_init_pos=0;diag_on_x=false;
+                    break;
+                    
                 default:
                     throw("Mode not implemented on init");
                 
@@ -112,18 +223,33 @@ class ImageOrderIterator{
         
         void next(){
             switch (mode){
-                case 0://row major
+                case modes::row_major:
                     next_row_major();
                     break;
                     
-                case 1: //col major
+                case modes::column_major:
                     next_col_major();
                     break;
                 
                 case modes::zig_zag_1:
+                case modes::zig_zag_2:
                     nextZigZag1();
                     break;
+                
+                case modes::row_major_scan_1:
+                case modes::row_major_scan_2:
+                    nextRowMajorScan1();
+                    break;
                     
+                case modes::column_major_scan_1:
+                case modes::column_major_scan_2:
+                    nextColMajorScan1();
+                    break;
+                    
+                case modes::diag_uR_1:
+                    nextDiagUR1();
+                    break;
+                
                 default:
                     throw("Mode not implemented on next");
                 
@@ -204,10 +330,10 @@ void RLE_Encode(const std::vector<uint8_t> & bitmap,std::vector<huff_data> & dat
     while(i<max_pos){
         huff_data count =0;
         huff_data value=bitmap[i];
-        if(i==max_pos-1){
+        ++i;
+        if(i==max_pos){
             goto past_while;
         }
-        ++i;
         while(count <255 and i<max_pos and bitmap[i]==value){
             ++count;
             ++i;
@@ -345,10 +471,10 @@ int main(int argc, char *argv[]){
             
             if(optind==(argc-2)){
                 std::string in_filename=argv[optind];
-                std::string out_filename=argv[optind+1];;
+                std::string out_filename=argv[optind+1];
                 if(encode){ 
-                    CodedFile file=Encode(FileToPicture(in_filename),mode,order);
-                    WriteData(file,out_filename);
+                    CodedFile c_file=Encode(FileToPicture(in_filename),mode,order);
+                    WriteData(c_file,out_filename);
                 }else{
                     PictureToFile(out_filename,Decode(ReadData(in_filename)));
                 }
@@ -363,8 +489,9 @@ int main(int argc, char *argv[]){
         }
     }catch(char const * msg){
         std::cerr << msg << std::endl;
+        return EXIT_FAILURE;
     }
     
-    return 0;
+    return EXIT_SUCCESS;
 }
 

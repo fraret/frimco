@@ -22,7 +22,7 @@ void BinaryFileOf::put(uint8_t char_f){
     if(next_bit_remaining==8){
         outstream.put(char_f);
     }else{
-        next_bit<<next_bit_remaining;
+        next_bit=next_bit<<next_bit_remaining;
         outstream.put(next_bit);
         next_bit=0;
         next_bit_remaining=8;
@@ -35,7 +35,7 @@ void BinaryFileOf::close(){
     if(next_bit_remaining==8){
         outstream.close();
     }else{
-        next_bit<<next_bit_remaining;
+        next_bit=next_bit<<next_bit_remaining;
         outstream.put(next_bit);
         next_bit=0;
         next_bit_remaining=8;
