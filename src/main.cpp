@@ -241,6 +241,30 @@ std::vector<uint8_t> RLE_Decode(const std::vector<huff_data> & data,const std::v
 }
 
 
+
+
+
+std::vector<uint8_t> DeltaEncode(const std::vector<uint8_t> & bitmap){
+    uint8_t prev_pixel=0;
+    std::vector<uint8_t> answer(bitmap.size());
+    for(int i=0;i<bitmap.size();++i){
+        answer[i]=bitmap[i]-prev_pixel;
+        prev_pixel=bitmap[i];
+    }
+    return answer;
+}
+
+std::vector<uint8_t> DeltaDecode(const std::vector<uint8_t> & bitmap){
+    uint8_t prev_pixel=0;
+    std::vector<uint8_t> answer(bitmap.size());
+    for(int i=0;i<bitmap.size();++i){
+        answer[i]=bitmap[i]+prev_pixel;
+        prev_pixel=answer[i];
+    }
+    return answer;
+}
+
+
 CodedFile Encode(picture image,uint8_t mode,uint8_t order){
     CodedFile answer;
     answer.mode=mode;
@@ -249,8 +273,7 @@ CodedFile Encode(picture image,uint8_t mode,uint8_t order){
     answer.y_size=image.y_size;
     picture reordered_image=ImageToReorder(image,order);
     if(answer.isDelta()){
-        //encode delta
-        std::cout<<"Not implemented"<<std::endl;
+        image.bitmap=DeltaEncode(reordered_image.bitmap);
     }else{
         image=reordered_image;
     }
@@ -273,8 +296,7 @@ picture Decode(CodedFile coded_file){
         temp=coded_file.data;
     }
     if(coded_file.isDelta()){
-        //encode delta
-        std::cout<<"Not implemented"<<std::endl;
+        answer.bitmap=DeltaDecode(temp);
     }else{
         answer.bitmap=temp;
     }
