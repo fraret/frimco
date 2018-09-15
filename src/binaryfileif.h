@@ -2,7 +2,6 @@
 #define BINARYFILEIF_H
 
 
-
 #include <fstream>
 #include <string>
 
@@ -12,7 +11,6 @@ class BinaryFileIf{
     private:
         uint8_t next_bit=0;
         uint8_t next_bit_remaining=0;
-        //as oldput;
         std::ifstream instream;
     
     public:

@@ -84,7 +84,7 @@ node* CreateHuffTree(const std::vector<std::pair<huff_data,index>> & data_and_fr
     std::priority_queue<node*,std::vector<node*>,more_frequent> p_queue;
     for(auto & p: data_and_freqs){
         p_queue.push(new node(p.first,p.second,0));
-    }//push everything
+    }
     index i=1;
     while(p_queue.size()>1){
         node* first=p_queue.top();
@@ -111,7 +111,6 @@ node* CreateHuffTree(const std::vector<huff_data> & vector){
 
 bool canon(std::pair<huff_data,huff_data> & a, std::pair<huff_data,huff_data> & b){
         if(a.second<b.second) return true;
-        //if(a.first<b.first) return true;
         return false;
 }
 
@@ -152,15 +151,12 @@ std::pair<std::map<huff_data,std::vector<bool>>,std::vector<std::pair<huff_data,
     
     
     for(auto & p:pairs){
-        //std::cerr<<(int)p.second<<' '<<(int)p.first<<std::endl;
         if(nums.size()) increment(nums);
         while(p.second>nums.size()) nums.push_back(0);
         answer[p.first]=nums;
         
         
     }
-    
-    //std::cerr<<"------------------------"<<std::endl;
     return {answer,pairs};
 }
 
@@ -187,9 +183,7 @@ std::vector<huff_data> MapToVector(const std::map<huff_data,std::vector<bool>> &
     
     
     for(auto & p:pairs){
-        //std::cerr<<(int)p.second<<' '<<(int)p.first<<std::endl;
         freq.push_back(p.first);
-        
         
     }
     
@@ -198,16 +192,9 @@ std::vector<huff_data> MapToVector(const std::map<huff_data,std::vector<bool>> &
 }
 
 std::vector<huff_data> MapToVector(std::pair<std::map<huff_data,std::vector<bool>>,std::vector<std::pair<huff_data,huff_data>>> & thing){
-    /* 
-     * 
-     * 
-     */
-    
-    //std::cout<<"p";
     return MapToVector(thing.first,thing.second);
     
 }
-
 
 huff_data ReadHuffNum(BinaryFileIf & infile){
     static_assert(sizeof(huff_data)==1, "Multi-byte huffman not yet implemented");
@@ -254,7 +241,6 @@ node* TreeFromFile(BinaryFileIf & infile){
         remaining_codes-=next_num;
         data_num+=next_num;
         remaining_codes*=2;
-        //std::cerr<<(int)next_num<<std::endl;
         
     }
     
@@ -275,7 +261,6 @@ node* TreeFromFile(BinaryFileIf & infile){
 void VectorToFile(const std::vector<huff_data> & vector_f,BinaryFileOf & outfile){
     for(const auto & num:vector_f){
         WriteHuffNum(num,outfile);
-        //std::cerr<<"Num: "<<(int)num<<std::endl;
     }
 }
 
@@ -295,13 +280,11 @@ std::vector<huff_data> FileToData(BinaryFileIf & infile, node* tree,index num){
     index i=0;
     while(i<num){
         if(current->leaf){
-            //std::cerr <<' '<<current->value<<std::endl;
             answer[i]=current->value;
             current=tree;
             ++i;
         }else{
             bool bit=infile.GetBit();
-            //std::cerr <<(int)bit;
             if(bit){
                 current=current->right;
             }else{
@@ -352,7 +335,6 @@ CodedFile ReadData(std::string & filename){
     }else infile.get();
     infile.get();
     answer.mode=infile.get();
-    //std::cerr<<"Mode: "<<(int) answer.mode<<std::endl;
     answer.order=infile.get();
     infile.get(); //0A
     answer.x_size=ReadIndex(infile);
@@ -366,7 +348,6 @@ CodedFile ReadData(std::string & filename){
     uint8_t temp=infile.get();
     if(temp!=0xFF){
         std::cout<<(int)temp<<std::endl;
-        //HuffTreeToMap();
         
         throw ("No data");
     }
@@ -376,7 +357,6 @@ CodedFile ReadData(std::string & filename){
     if((answer.mode & 0x80)){//Uses a single Huffman table or two
         answer.data=FileToData(infile,tree,datalength);
     }else{
-        //Should improve this
         answer.data.resize(datalength);
         for(index i=0;i<datalength;++i){
             answer.data[i]=infile.get();
@@ -399,7 +379,6 @@ CodedFile ReadData(std::string & filename){
             answer.coefs=FileToData(infile,tree,runlength);
             DestroyTree(tree);
         }else{
-            //Should improve this
             answer.coefs.resize(runlength);
             for(index i=0;i<runlength;++i){
                 answer.coefs[i]=infile.get();

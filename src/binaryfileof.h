@@ -10,7 +10,6 @@ class BinaryFileOf{
     private:
         uint8_t next_bit=0;
         uint8_t next_bit_remaining=8;
-        //as oldput;
         std::ofstream outstream;
     
     public:

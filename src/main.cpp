@@ -48,20 +48,17 @@ class ImageOrderIterator{
         }
         
         
-        bool & zig_zag_1_dir=toggle; //false indicates 
+        bool & zig_zag_1_dir=toggle; 
         const bool DL=false;
         const bool UR=true;
         
         void nextZigZag1(){
-            //std::cerr << x << ' '<< y<<std::endl;
             if(IsBottom() and IsRight()) valid=false;
             if(zig_zag_1_dir==DL){
                 if(IsBottom()){
-                    //std::cerr<<"a"<<std::endl;
                     ++x;
                     zig_zag_1_dir=UR;
                 }else if(IsLeft()){
-                    //std::cerr<<"b"<<std::endl;
                     ++y;
                     zig_zag_1_dir=UR;
                 }else{
@@ -70,11 +67,9 @@ class ImageOrderIterator{
                 }
             }else{
                 if(IsRight()){
-                    //std::cerr<<"c"<<std::endl;
                     ++y;
                     zig_zag_1_dir=DL;
                 }else if(IsTop()){
-                    //std::cerr<<"d"<<std::endl;
                     ++x;
                     zig_zag_1_dir=DL;
                 }else{
@@ -205,7 +200,9 @@ class ImageOrderIterator{
                     break;
                 
                 case modes::diag_uR_1:
-                    x=0;y=0;past_init_pos=0;diag_on_x=false;
+					x=0;y=0;
+					past_init_pos=0;
+					diag_on_x=false;
                     break;
                     
                 default:
@@ -366,10 +363,6 @@ std::vector<uint8_t> RLE_Decode(const std::vector<huff_data> & data,const std::v
     return answer;
 }
 
-
-
-
-
 std::vector<uint8_t> DeltaEncode(const std::vector<uint8_t> & bitmap){
     uint8_t prev_pixel=0;
     std::vector<uint8_t> answer(bitmap.size());
@@ -479,12 +472,12 @@ int main(int argc, char *argv[]){
                     PictureToFile(out_filename,Decode(ReadData(in_filename)));
                 }
             }else{
-                std::cout<<"Usage: program [e|c] -(d|r|h) input_file output_file"<<std::endl;
+                std::cout<<"Usage: program -[e|d] -(D|R|H)(h_num)input_file output_file"<<std::endl;
             }
             
             
         }else{
-            std::cout<<"Usage: program [e|c] -(d|r|h) input_file output_file"<<std::endl;
+            std::cout<<"Usage: program -[e|d] -(D|R|H)(h_num)input_file output_file"<<std::endl;
             
         }
     }catch(char const * msg){
@@ -494,4 +487,3 @@ int main(int argc, char *argv[]){
     
     return EXIT_SUCCESS;
 }
-
