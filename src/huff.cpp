@@ -9,12 +9,12 @@
 #include "huff.h"
 
 
-struct node{
+struct node{  //Definition of a hufmman tree node.
     node *left, *right;
     huff_data value;
-    index freq,age;
+    index freq,age; //Age is just a parameter to know the order in which the nodes were created to then order them if freq is equal. TODO: I think it is not used. See wheter I am right or not, 
     bool leaf;
-    node(huff_data data,index freq_f, index age_f){
+    node(huff_data data,index freq_f, index age_f){ //initialization for leaf
         left=NULL;
         right=NULL;
         age=age_f;
@@ -22,21 +22,21 @@ struct node{
         freq=freq_f;
         leaf=true;
     }
-    node(node *left_f, node *right_f,index age_f){
+    node(node *left_f, node *right_f,index age_f){ //initalization for not-leaf node
         left=left_f;
         right=right_f;
         age=age_f;
-        freq=left->freq+right->freq;
+        freq=left->freq+right->freq; //Huffman: frequency is the sum of freq of the children
         value=huff_null;
         leaf=false;
     }
-    node(){
+    node(){ //initialization for null. TODO: Check wheter this is used and delete it/replace places where it is used if possible. 
         left=NULL;
         right=NULL;
         value=huff_null;
         leaf=false;
     }
-    node(huff_data data){
+    node(huff_data data){ //Initialization without freq. TODO: Chek where this is used and find a better way if possible.
         left=NULL;
         right=NULL;
         value=data;
@@ -45,7 +45,7 @@ struct node{
 };
 
 
-struct more_frequent{
+struct more_frequent{ // 2019-01-04: I believe this is a comparator for some sort of sorting function
 
     bool operator()(node* a, node* b){
         if((a->freq)>(b->freq)) return true;   
@@ -115,6 +115,7 @@ bool canon(std::pair<huff_data,huff_data> & a, std::pair<huff_data,huff_data> & 
 }
 
 void increment(std::vector<bool> & vec){
+    //2019-01-04: It seems that, given a vector of bools, it looks for the last false, makes it true and makes everything after it false. WHY?
     index last=vec.size()-1;
     while(vec[last]){
         vec[last]=false;

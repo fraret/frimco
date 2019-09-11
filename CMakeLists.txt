@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(tdr2)
+project(frimco)
 set(CMAKE_BUILD_TYPE Debug)
 
 file(GLOB SOURCES
@@ -8,6 +8,6 @@ file(GLOB SOURCES
 )
 
 
-add_executable(tdr2 ${SOURCES})
+add_executable(frimco ${SOURCES})
 
-install(TARGETS tdr2 RUNTIME DESTINATION bin)
+install(TARGETS frimco RUNTIME DESTINATION bin)

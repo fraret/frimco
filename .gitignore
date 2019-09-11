@@ -1,3 +1,5 @@
 CMakeFiles/*
 build/*
 *.old
+.*
+*.kdev4

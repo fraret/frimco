@@ -200,9 +200,9 @@ class ImageOrderIterator{
                     break;
                 
                 case modes::diag_uR_1:
-					x=0;y=0;
-					past_init_pos=0;
-					diag_on_x=false;
+                    x=0;y=0;
+                    past_init_pos=0;
+                    diag_on_x=false;
                     break;
                     
                 default:
@@ -328,16 +328,12 @@ void RLE_Encode(const std::vector<uint8_t> & bitmap,std::vector<huff_data> & dat
         huff_data count =0;
         huff_data value=bitmap[i];
         ++i;
-        if(i==max_pos){
-            goto past_while;
-        }
-        while(count <255 and i<max_pos and bitmap[i]==value){
+        
+        if (i != max_pos) while(count <255 and i<max_pos and bitmap[i]==value){
             ++count;
             ++i;
         }
-        
-        past_while:
-        
+                
         coefs.push_back(count);
         data.push_back(value);
     }
